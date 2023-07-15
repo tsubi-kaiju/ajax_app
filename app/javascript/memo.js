@@ -1,24 +1,37 @@
-function post (){
-  
-  //idをキーに登録ボタンの要素を取得
-  const submit = document.getElementById("submit");
+const buildHTML = (XHR) => {
+  const item = XHR.response.post;
+  const html = `
+    <div class="post">
+      <div class="post-date">
+        投稿日時：${item.created_at}
+      </div>
+      <div class="post-content">
+        ${item.content}
+      </div>
+    </div>`;
+  return html;
+};
 
-  //投稿ボタンがクリックされたらイベント発火
+function post (){
+  const submit = document.getElementById("submit");
   submit.addEventListener("click", (e) => {
-    //投稿ボタンのクリックを無効化
     e.preventDefault();
-    //getElementByIdメソッドで取得したフォームの要素を変数formに格納
     const form = document.getElementById("form");
-    //フォームに入力された値を取得
     const formData = new FormData(form);
-    // 非同期通信を行うためにXMLHttpRequestオブジェクトを生成
     const XHR = new XMLHttpRequest();
-    //リクエストを初期化
     XHR.open("POST", "/posts", true);
-    //サーバーからのレスポンスの形式をjsonに指定
     XHR.responseType = "json";
-    //フォームの内容をサーバに送信
     XHR.send(formData);
+    XHR.onload = () => {
+      if (XHR.status != 200) {
+        alert(`Error ${XHR.status}: ${XHR.statusText}`);
+        return null;
+      };
+      const list = document.getElementById("list");
+      const formText = document.getElementById("content");
+      list.insertAdjacentHTML("afterend", buildHTML(XHR));
+      formText.value = "";
+    };
   });
 };
 
